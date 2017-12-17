@@ -1,3 +1,5 @@
-#!/usr/bin/env Ruby
+#!/usr/bin/env ruby
+
+require_relative "../lib/amaz_scrape.rb"
 
 AmazScrape::CLI.new.call

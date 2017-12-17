@@ -1,6 +1,6 @@
 
-class DailyDeal::CLI
+class AmazScrape::CLI
   def call
-    puts "Today's Daily Deals:"
+    puts "Time to find out about some items on Amazon!"
   end
 end

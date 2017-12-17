@@ -1,5 +1,5 @@
-require "amaz_scrape/version"
+require_relative "./amaz_scrape/version"
+require_relative "./amaz_scrape/cli.rb"
+require_relative "./amaz_scrape/amazon_item.rb"
 
-module AmazScrape
-  # Your code goes here...
-end
+require 'nokogiri'
