@@ -42,6 +42,21 @@ class AmazScrape::CLI
   end
 
   def explore_list
+    input = "explore"
+    while input.strip.downcase != "exit" and input.strip.downcase != "back"
+      puts "Please enter the number of the item you would like to explore or enter \"back\" to retype a new product or enter \"exit\" to quit"
 
+      input = gets
+
+      if input == "back"
+        puts "time to go back!"
+      elsif input == "exit"
+        puts "exit time!!"
+      else
+        #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
+      end
+
+    end
+    input
   end
 end
