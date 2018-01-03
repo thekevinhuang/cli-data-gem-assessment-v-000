@@ -1,3 +1,4 @@
+require_relative "../amaz_scrape.rb"
 
 class AmazScrape::CLI
   #first greet the user
@@ -6,6 +7,13 @@ class AmazScrape::CLI
   #ask user if they would like additional detail on any in the list
   #allow them to quit/reprint list/re-enter a new item to search
   #
+
+  def initialize
+    @item_list = []
+  end
+  def item_list=(scraped_items)
+    @item_list = scraped_items
+  end
 
   def call
 
@@ -18,8 +26,9 @@ class AmazScrape::CLI
       input = gets.strip
       if input != "exit"
         puts "You've selected #{input}!"
-        list_items
-        explore_list
+        self.item_list = scrape_items #should just be the array
+        print_items
+        input = explore_list
         #secondary loop with the following choices:
         #1. select one of the items
         #2. go back to item select
@@ -30,15 +39,39 @@ class AmazScrape::CLI
     puts "Thanks for using!"
   end
 
-  def list_items
-    item = "placeholder" #change to real amazon item later/for loop
-    print_item(item)
+  def item_list
+    @item_list
+  end
+
+  def scrape_items
+    item_array = []
+    #supposed to scrape all of the items but for now will just create some empty ones
+    #create scraper class, and scrape method
+    #have that scrape item return an array of items
+    item_1_hash = {:name => "Example Pot", :maker => "Lodge", :price => 49.99, :rating => 4.6, :prime => true}
+    amazon_item_1 = AmazScrape::Amazon_Item.new(item_1_hash)
+    item_2_hash = {:name => "Pota Examples", :maker => "Cast Iron Guys", :price => 109.99, :rating => 4.2, :prime => true}
+    amazon_item_2 = AmazScrape::Amazon_Item.new(item_2_hash)
+    item_array << amazon_item_1
+    item_array << amazon_item_2
+    item_array
+  end
+
+  def print_items #just physically lists items and accesses the items from an array
+    self.item_list.each do |item| #change to real amazon item later/for loop
+      print_item(item)
+    end
   end
 
   def print_item(amaz_item)
-    puts "Example Pot - by Lodge - $49.99 - 4.6 Stars - Prime Available"
+    #puts "Example Pot - by Lodge - $49.99 - 4.6 Stars - Prime Available"
+    if amaz_item.prime == true
+      prime_token = "Prime Eligible"
+    else
+      prime_token = "Not Prime Eligible"
+    end
 
-    #puts "#{name} - by #{manufacturer} - #{price} - #{rating} - #{prime_token}
+    puts "#{amaz_item.name} - by #{amaz_item.maker} - $#{amaz_item.price} - #{amaz_item.rating} Stars - #{prime_token}"
   end
 
   def explore_list
@@ -48,11 +81,12 @@ class AmazScrape::CLI
 
       input = gets
 
-      if input == "back"
+      if input.strip.downcase == "back"
         puts "time to go back!"
-      elsif input == "exit"
+      elsif input.strip.downcase == "exit"
         puts "exit time!!"
       else
+
         #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
       end
 
