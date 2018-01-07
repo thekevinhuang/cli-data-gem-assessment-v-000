@@ -11,6 +11,7 @@ class AmazScrape::CLI
   def initialize
     @item_list = []
   end
+
   def item_list=(scraped_items)
     @item_list = scraped_items
   end
@@ -86,11 +87,25 @@ class AmazScrape::CLI
       elsif input.strip.downcase == "exit"
         puts "exit time!!"
       else
-
+        if valid_input?(input)
+          puts "This is a valid selection"
+        end
         #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
       end
 
     end
     input
+  end
+
+  def valid_input?(input)
+    int_input = input.to_i
+    value = true
+    if int_input > 0 and int_input <= self.item_list.length
+      value = true
+    else
+      puts "This input is not valid. Please enter a new response"
+      value = false
+    end
+    value
   end
 end
