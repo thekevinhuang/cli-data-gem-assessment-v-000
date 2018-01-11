@@ -8,6 +8,8 @@ class AmazScrape::CLI
   #allow them to quit/reprint list/re-enter a new item to search
   #
 
+
+
   def initialize
     @item_list = []
   end
@@ -17,7 +19,6 @@ class AmazScrape::CLI
   end
 
   def call
-
     input = "start"
 
     while input.strip.downcase != "exit"
@@ -27,7 +28,7 @@ class AmazScrape::CLI
       input = gets.strip
       if input != "exit"
         puts "You've selected #{input}!"
-        self.item_list = scrape_items #should just be the array
+        self.item_list = scrape_items(input)#should just be the array
         print_items
         input = explore_list
         #secondary loop with the following choices:
@@ -44,17 +45,17 @@ class AmazScrape::CLI
     @item_list
   end
 
-  def scrape_items
+  def scrape_items(input)
+
+    scraper = AmazScrape::Scraper.new(input)
+
     item_array = []
     #supposed to scrape all of the items but for now will just create some empty ones
     #create scraper class, and scrape method
     #have that scrape item return an array of items
-    item_1_hash = {:name => "Example Pot", :maker => "Lodge", :price => 49.99, :rating => 4.6, :prime => true}
-    amazon_item_1 = AmazScrape::Amazon_Item.new(item_1_hash)
-    item_2_hash = {:name => "Pota Examples", :maker => "Cast Iron Guys", :price => 109.99, :rating => 4.2, :prime => true}
-    amazon_item_2 = AmazScrape::Amazon_Item.new(item_2_hash)
-    item_array << amazon_item_1
-    item_array << amazon_item_2
+
+    item_array = scraper.scrape
+
     item_array
   end
 
@@ -108,4 +109,5 @@ class AmazScrape::CLI
     end
     value
   end
+
 end
