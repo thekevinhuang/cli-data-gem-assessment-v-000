@@ -21,61 +21,69 @@ class AmazScrape::Scraper
 
 
   def item_valid?
-    validation = true #false
+    validation = false
+
+    @item.strip!
+    @item.gsub!(/ /, "%20")
     puts AMZ_Websearch+@item
-    #@item.strip!
-    #@item.gsub!(/ /, "%20")
-    #@page = Nokogiri::HTML(open(AMZ_Websearch+@item))
-    #@item_list = @page.css("li.s-result-item")
-    #if @item_list.length > 1
-    #  validation = true
-    #else
-    #  validation = false
-    #end
+    @page = Nokogiri::HTML(open(AMZ_Websearch+@item))
+    @amazon_noto_item_list = @page.css("body li.s-result-item")
+    puts @amazon_noto_item_list.length
+    if @amazon_noto_item_list.length > 0
+      validation = true
+    else
+      validation = false
+    end
     validation
   end
 
   def read_item(amazon_noto_item)
     #page_item_hash = {}
+=begin
     if amazon_noto_item == 1
       item_hash = {:name => "Example Pot", :maker => "Lodge", :price => 49.99, :rating => 4.6, :prime => true}
     else
       item_hash = {:name => "Pota Examples", :maker => "Cast Iron Guys", :price => 109.99, :rating => 4.2, :prime => true}
     end
-    amazon_item = AmazScrape::Amazon_Item.new(item_hash)
+=end
+
+
+    page_item_hash = {}
+    page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text
+    puts page_item_hash[:name]
+    page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
+    puts page_item_hash[:price]
+    binding.pry
+    page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none span.a-size-small.a-color-secondary")[1].text
+    puts page_item_hash[:maker]
+    if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
+      page_item_hash[:prime] = true
+    else
+      page_item_hash[:prime] = false
+    end
+
+    puts page_item_hash[:prime]
+    page_item_hash[:rating] = amazon_noto_item.css("i.a-icon-star span.a-icon-alt").text
+    puts page_item_hash[:rating]
+    page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute('href').value
+
+
+    amazon_item = AmazScrape::Amazon_Item.new(page_item_hash)
 
     amazon_item
   end
 
   def scrape
-    item_counter = [1,2]
-    item_list = []
+    if item_valid?
 
-    item_counter.each do |item_num|
-      item_list << read_item(item_num)
+      item_list = []
+
+      @amazon_noto_item_list.each do |amazon_noto_item|
+        item_list << read_item(amazon_noto_item)
+      end
+
+      item_list
     end
-
-    item_list
-=begin
-    @item_list.each do |list_item|
-    page_item_hash = {}
-    @name = list_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text
-    print name
-    @price = list_item.css("span.a-offscreen").text
-    print price
-    @manufacturer = list_item.css("div.a-row.a-spacing-none span.a-size-small.a-color-secondary")[1].text
-    print manufacturer
-    if list_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
-      @prime = true
-    else
-      @prime = false
-    end
-    print prime
-    @rating = list_item.css("i.a-icon-star span.a-icon-alt").text
-    print rating
-    print list_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal")
-    @link = list_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute('href').value
-=end
-
+    puts "There were no results!"
   end
 end
