@@ -27,7 +27,7 @@ class AmazScrape::Scraper
     @item.gsub!(/ /, "%20")
     puts AMZ_Websearch+@item
     @page = Nokogiri::HTML(open(AMZ_Websearch+@item))
-    @amazon_noto_item_list = @page.css("body li.s-result-item")
+    @amazon_noto_item_list = @page.css("ul#s-results-list-atf li[id^='result_']")
     puts @amazon_noto_item_list.length
     if @amazon_noto_item_list.length > 0
       validation = true
@@ -38,7 +38,7 @@ class AmazScrape::Scraper
   end
 
   def read_item(amazon_noto_item)
-    #page_item_hash = {}
+
 =begin
     if amazon_noto_item == 1
       item_hash = {:name => "Example Pot", :maker => "Lodge", :price => 49.99, :rating => 4.6, :prime => true}
@@ -54,7 +54,7 @@ class AmazScrape::Scraper
     page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
     puts page_item_hash[:price]
     binding.pry
-    page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none span.a-size-small.a-color-secondary")[1].text
+    page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none div.a-size-small.a-color-secondary")[1].text
     puts page_item_hash[:maker]
     if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
       page_item_hash[:prime] = true
