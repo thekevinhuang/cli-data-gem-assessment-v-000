@@ -24,10 +24,12 @@ class AmazScrape::CLI
     while input.strip.downcase != "exit"
       puts "Please type an item that you would like to search on Amazon!"
       puts "Type 'exit' to quit"
+      print_separator
 
       input = gets.strip
       if input != "exit"
         puts "You've selected #{input}!"
+        print_separator
         self.item_list = scrape_items(input)#should just be the array
         print_items
         #secondary loop with the following choices:
@@ -65,7 +67,9 @@ class AmazScrape::CLI
       end
       input = explore_list
     else
+      print_separator
       puts "Nothing to show!"
+      print_separator
     end
   end
 
@@ -84,12 +88,14 @@ class AmazScrape::CLI
     input = "explore"
     while input.strip.downcase != "exit" and input.strip.downcase != "back"
       puts "Please enter the number of the item you would like to explore or enter \"back\" to retype a new product or enter \"exit\" to quit"
-
+      print_separator
       input = gets
 
       if input.strip.downcase == "back"
+        print_separator
         puts "time to go back!"
       elsif input.strip.downcase == "exit"
+        print_separator
         puts "exit time!!"
       else
         if valid_input?(input)
@@ -109,9 +115,13 @@ class AmazScrape::CLI
       value = true
     else
       puts "This input is not valid. Please enter a new response"
+      print_separator
       value = false
     end
     value
   end
 
+  def print_separator
+    puts "---------------\n"
+  end
 end

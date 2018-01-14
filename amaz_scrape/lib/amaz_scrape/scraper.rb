@@ -52,45 +52,60 @@ class AmazScrape::Scraper
     page_item_hash = {}
 
     #scrape name and store
-    page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text
-    puts page_item_hash[:name]
-
-    #scrape price and store
-    page_item_hash[:price] = text_if_not_empty(amazon_noto_item.css("span.a-offscreen"))
-    puts page_item_hash[:price]
+    if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal"))
+      page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text
+      puts page_item_hash[:name]
     
-    
-    #scrape maker and store WIP 
-    page_item_hash[:maker] = text_if_not_empty(amazon_noto_item.css("div.a-row.a-spacing-none span.a-size-small.a-color-secondary")[1])
-    puts page_item_hash[:maker]
+      #scrape price and store
+      if if_not_nil(amazon_noto_item.css("span.a-offscreen"))
+        page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
+        puts page_item_hash[:price]
+      end
 
-    #scrape prime and store
-    if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
-      page_item_hash[:prime] = true
-    else
-      page_item_hash[:prime] = false
+      #scrape maker and store WIP 
+      if if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) span.a-size-small.a-color-secondary:nth-child(2)"))
+        page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) span.a-size-small.a-color-secondary:nth-child(2)").text
+      elsif if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)"))
+        page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)").text
+      end
+      puts page_item_hash[:maker]
+
+      #scrape prime and store
+      if if_not_nil(amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt"))
+        if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
+          page_item_hash[:prime] = true
+        else
+          page_item_hash[:prime] = false
+        end
+      end
+
+      puts page_item_hash[:prime]
+
+      #scrape rating and store
+      if if_not_nil(amazon_noto_item.css("i.a-icon-star span.a-icon-alt"))
+        page_item_hash[:rating] = amazon_noto_item.css("i.a-icon-star span.a-icon-alt").text
+        puts page_item_hash[:rating]
+      end
+
+      #scrape link for clickthrough
+      if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal"))
+        if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute("href"))
+          page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute('href').value
+          puts page_item_hash[:link]
+        end
+      end
+
+      amazon_item = AmazScrape::Amazon_Item.new(page_item_hash)
+
+      amazon_item
     end
-
-    puts page_item_hash[:prime]
-
-    #scrape rating and store
-    page_item_hash[:rating] = text_if_not_empty(amazon_noto_item.css("i.a-icon-star span.a-icon-alt"))
-    puts page_item_hash[:rating]
-
-    #scrape link for clickthrough
-    page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute('href').value
-
-
-    amazon_item = AmazScrape::Amazon_Item.new(page_item_hash)
-
-    amazon_item
   end
 
-  def text_if_not_empty(amazon_item_element_array)
-    if amazon_item_element_array
-      if !amazon_item_element_array.empty?
-        amazon_item_element_array.text
-      end
+  
+  
+  def if_not_nil(amazon_item_element_array)
+    if !amazon_item_element_array.nil?
+      amazon_item_element_array
     end
   end
 
