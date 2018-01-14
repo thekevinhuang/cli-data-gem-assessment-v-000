@@ -7,55 +7,64 @@ class AmazScrape::Scraper
 
   def initialize(item)
     @item = item
+    @amazon_noto_item_list = []
   end
-
-=begin
-  def scrape_items
-    if item_valid?
-      scrape
-    else
-
-    end
-  end
-=end
 
 
   def item_valid?
+    
     validation = false
 
     @item.strip!
     @item.gsub!(/ /, "%20")
     puts AMZ_Websearch+@item
-    @page = Nokogiri::HTML(open(AMZ_Websearch+@item))
-    @amazon_noto_item_list = @page.css("body li.s-result-item")
-    puts @amazon_noto_item_list.length
-    if @amazon_noto_item_list.length > 0
+    begin
+
+      io_item = open(AMZ_Websearch+@item)
+      connection_status = io_item.status[0]
+      
+      @page = Nokogiri::HTML(io_item)
+      
+      @amazon_noto_item_list = @page.css("body li.s-result-item")
+      puts @amazon_noto_item_list.length
+
+    rescue OpenURI::HTTPError => connection_error
+      connection_status = connection_error.io.status[0]
+      puts "Scraping instance failed with code #{connection_status}"
+    end
+
+    if !@amazon_noto_item_list.empty?
       validation = true
     else
       validation = false
     end
+
     validation
   end
 
   def read_item(amazon_noto_item)
     #page_item_hash = {}
-=begin
-    if amazon_noto_item == 1
-      item_hash = {:name => "Example Pot", :maker => "Lodge", :price => 49.99, :rating => 4.6, :prime => true}
-    else
-      item_hash = {:name => "Pota Examples", :maker => "Cast Iron Guys", :price => 109.99, :rating => 4.2, :prime => true}
-    end
-=end
 
+    #need to be careful about the usage of .text because certain types will error out
+    #implement an array empty check for this
 
+    #create blank hash to store scraped information
     page_item_hash = {}
+
+    #scrape name and store
     page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text
     puts page_item_hash[:name]
-    page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
+
+    #scrape price and store
+    page_item_hash[:price] = text_if_not_empty(amazon_noto_item.css("span.a-offscreen"))
     puts page_item_hash[:price]
-    binding.pry
-    page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none span.a-size-small.a-color-secondary")[1].text
+    
+    
+    #scrape maker and store WIP 
+    page_item_hash[:maker] = text_if_not_empty(amazon_noto_item.css("div.a-row.a-spacing-none span.a-size-small.a-color-secondary")[1])
     puts page_item_hash[:maker]
+
+    #scrape prime and store
     if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
       page_item_hash[:prime] = true
     else
@@ -63,8 +72,12 @@ class AmazScrape::Scraper
     end
 
     puts page_item_hash[:prime]
-    page_item_hash[:rating] = amazon_noto_item.css("i.a-icon-star span.a-icon-alt").text
+
+    #scrape rating and store
+    page_item_hash[:rating] = text_if_not_empty(amazon_noto_item.css("i.a-icon-star span.a-icon-alt"))
     puts page_item_hash[:rating]
+
+    #scrape link for clickthrough
     page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute('href').value
 
 
@@ -73,17 +86,27 @@ class AmazScrape::Scraper
     amazon_item
   end
 
-  def scrape
-    if item_valid?
+  def text_if_not_empty(amazon_item_element_array)
+    if amazon_item_element_array
+      if !amazon_item_element_array.empty?
+        amazon_item_element_array.text
+      end
+    end
+  end
 
-      item_list = []
+  def scrape
+    item_list = []
+
+    if item_valid?
 
       @amazon_noto_item_list.each do |amazon_noto_item|
         item_list << read_item(amazon_noto_item)
       end
 
       item_list
+    else
+      puts "There were no results!"
+      item_list
     end
-    puts "There were no results!"
   end
 end

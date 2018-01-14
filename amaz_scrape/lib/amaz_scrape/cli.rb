@@ -8,10 +8,10 @@ class AmazScrape::CLI
   #allow them to quit/reprint list/re-enter a new item to search
   #
 
-
+  @item_list = []
 
   def initialize
-    @item_list = []
+    
   end
 
   def item_list=(scraped_items)
@@ -30,7 +30,6 @@ class AmazScrape::CLI
         puts "You've selected #{input}!"
         self.item_list = scrape_items(input)#should just be the array
         print_items
-        input = explore_list
         #secondary loop with the following choices:
         #1. select one of the items
         #2. go back to item select
@@ -60,8 +59,13 @@ class AmazScrape::CLI
   end
 
   def print_items #just physically lists items and accesses the items from an array
-    self.item_list.each do |item| #change to real amazon item later/for loop
-      print_item(item)
+    if !self.item_list.empty?
+      self.item_list.each do |item| #change to real amazon item later/for loop
+        print_item(item)
+      end
+      input = explore_list
+    else
+      puts "Nothing to show!"
     end
   end
 
