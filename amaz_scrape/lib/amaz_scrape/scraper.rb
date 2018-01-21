@@ -2,12 +2,13 @@ require_relative "../amaz_scrape.rb"
 
 class AmazScrape::Scraper
   AMZ_Websearch = "https://www.amazon.com/s/ref=nb_sb_noss_2?url=search-alias%3Daps&field-keywords="
-  attr_accessor :item
+  attr_accessor :item, :scraped_items
   #attr_reader :name, :price, :manufacturer, :prime, :rating, :item_list
 
   def initialize(item)
     @item = item
     @amazon_noto_item_list = []
+    @scraped_items = []
   end
 
 
@@ -25,7 +26,7 @@ class AmazScrape::Scraper
       
       @page = Nokogiri::HTML(io_item)
       
-      @amazon_noto_item_list = @page.css("body li.s-result-item")
+      @amazon_noto_item_list = @page.css("body li.s-result-item")[0..9]
       puts @amazon_noto_item_list.length
 
     rescue OpenURI::HTTPError => connection_error
@@ -53,48 +54,49 @@ class AmazScrape::Scraper
 
     #scrape name and store
     if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal"))
-      page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text
+      page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text.strip
       puts page_item_hash[:name]
-    
-      #scrape price and store
-      if if_not_nil(amazon_noto_item.css("span.a-offscreen"))
-        page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
-        puts page_item_hash[:price]
-      end
+      
+      if page_item_hash[:name].length > 1
+        #scrape price and store
+        if if_not_nil(amazon_noto_item.css("span.a-offscreen"))
+          page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
+          puts page_item_hash[:price]
+        end
 
-      #scrape maker and store WIP 
-      if if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) span.a-size-small.a-color-secondary:nth-child(2)"))
-        page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) span.a-size-small.a-color-secondary:nth-child(2)").text
-      elsif if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)"))
-        page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)").text
-      end
-      puts page_item_hash[:maker]
+        #scrape maker and store WIP 
+        if if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) span.a-size-small.a-color-secondary:nth-child(2)"))
+          page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) span.a-size-small.a-color-secondary:nth-child(2)").text
+        elsif if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)"))
+          page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)").text
+        end
+        puts page_item_hash[:maker]
 
-      #scrape prime and store
-      if if_not_nil(amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt"))
-        if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
-          page_item_hash[:prime] = true
-        else
-          page_item_hash[:prime] = false
+        #scrape prime and store
+        if if_not_nil(amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt"))
+          if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
+            page_item_hash[:prime] = true
+          else
+            page_item_hash[:prime] = false
+          end
+        end
+
+        puts page_item_hash[:prime]
+
+        #scrape rating and store
+        if if_not_nil(amazon_noto_item.css("i.a-icon-star span.a-icon-alt"))
+          page_item_hash[:rating] = amazon_noto_item.css("i.a-icon-star span.a-icon-alt").text
+          puts page_item_hash[:rating]
+        end
+
+        #scrape link for clickthrough
+        if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal")) && amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").class.method_defined?(:attr)
+          if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attr("href"))
+            page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attr('href').value
+            puts page_item_hash[:link]
+          end
         end
       end
-
-      puts page_item_hash[:prime]
-
-      #scrape rating and store
-      if if_not_nil(amazon_noto_item.css("i.a-icon-star span.a-icon-alt"))
-        page_item_hash[:rating] = amazon_noto_item.css("i.a-icon-star span.a-icon-alt").text
-        puts page_item_hash[:rating]
-      end
-
-      #scrape link for clickthrough
-      if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal"))
-        if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute("href"))
-          page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attribute('href').value
-          puts page_item_hash[:link]
-        end
-      end
-
       amazon_item = AmazScrape::Amazon_Item.new(page_item_hash)
 
       amazon_item
@@ -110,18 +112,15 @@ class AmazScrape::Scraper
   end
 
   def scrape
-    item_list = []
 
     if item_valid?
 
       @amazon_noto_item_list.each do |amazon_noto_item|
-        item_list << read_item(amazon_noto_item)
+        self.scraped_items << read_item(amazon_noto_item)
       end
-
-      item_list
+      self.scraped_items
     else
       puts "There were no results!"
-      item_list
     end
   end
 end

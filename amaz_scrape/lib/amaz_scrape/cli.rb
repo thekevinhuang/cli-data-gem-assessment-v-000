@@ -7,15 +7,18 @@ class AmazScrape::CLI
   #ask user if they would like additional detail on any in the list
   #allow them to quit/reprint list/re-enter a new item to search
   #
-
-  @item_list = []
+  attr_reader :amz_item_list
+  
+  @amz_item_list = []
 
   def initialize
     
   end
 
-  def item_list=(scraped_items)
-    @item_list = scraped_items
+  def amz_item_list=(scraped_items)
+    if scraped_items.all? { |item| item.is_a?(AmazScrape::Amazon_Item) }
+      @amz_item_list = scraped_items
+    end
   end
 
   def call
@@ -30,7 +33,7 @@ class AmazScrape::CLI
       if input != "exit"
         puts "You've selected #{input}!"
         print_separator
-        self.item_list = scrape_items(input)#should just be the array
+        self.amz_item_list = scrape_items(input)#should just be the array
         print_items
         #secondary loop with the following choices:
         #1. select one of the items
@@ -42,27 +45,25 @@ class AmazScrape::CLI
     puts "Thanks for using!"
   end
 
-  def item_list
-    @item_list
+
+  def amaz_item_list
+    @amaz_item_list
   end
 
   def scrape_items(input)
 
     scraper = AmazScrape::Scraper.new(input)
 
-    item_array = []
-    #supposed to scrape all of the items but for now will just create some empty ones
     #create scraper class, and scrape method
     #have that scrape item return an array of items
 
-    item_array = scraper.scrape
-
-    item_array
+    scraper.scrape
+    scraper.scraped_items
   end
 
   def print_items #just physically lists items and accesses the items from an array
-    if !self.item_list.empty?
-      self.item_list.each do |item| #change to real amazon item later/for loop
+    if !self.amz_item_list.empty?
+      self.amz_item_list.each do |item| #change to real amazon item later/for loop
         print_item(item)
       end
       input = explore_list
@@ -75,13 +76,8 @@ class AmazScrape::CLI
 
   def print_item(amaz_item)
     #puts "Example Pot - by Lodge - $49.99 - 4.6 Stars - Prime Available"
-    if amaz_item.prime == true
-      prime_token = "Prime Eligible"
-    else
-      prime_token = "Not Prime Eligible"
-    end
 
-    puts "#{amaz_item.name} - by #{amaz_item.maker} - $#{amaz_item.price} - #{amaz_item.rating} Stars - #{prime_token}"
+    puts "#{amaz_item.name} - by #{amaz_item.maker} - $#{amaz_item.price} - #{amaz_item.rating} Stars - #{amaz_item.prime_token}"
   end
 
   def explore_list
