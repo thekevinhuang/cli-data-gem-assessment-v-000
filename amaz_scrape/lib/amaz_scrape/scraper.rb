@@ -72,18 +72,14 @@ class AmazScrape::Scraper
     feature_list = @detail_page.css("div#feature-bullets li span.a-list-item")
     scraped_features = feature_list.collect {|feat| feat.text.strip}
     page_detail_hash[:features] = scraped_features.shift
-    puts page_detail_hash[:features]
 
     #in stock
     #div#availibility
-    page_detail_hash[:in_stock] = @detail_page.css("div#availibility span").text.strip
-    puts page_detail_hash[:in_stock]
-    binding.pry
+    page_detail_hash[:in_stock] = @detail_page.css("div#availability span").text.strip
 
     #seller
     #div#merchant-info
     page_detail_hash[:seller] = @detail_page.css("div#merchant-info").text.split.join(" ").strip
-    puts page_detail_hash[:seller]
 
     #colors
     if if_not_nil(@detail_page.css("div#variation_color_name ul li"))
@@ -92,15 +88,10 @@ class AmazScrape::Scraper
       end
 
       page_detail_hash[:colors] = colors
-
-      puts page_detail_hash[:colors]
-      
+      page_detail_hash
     end
     #check if exists
     #div#variation_color_name
-  end
-
-  def list_item_scrape()
   end
 
   def read_item(amazon_noto_item)

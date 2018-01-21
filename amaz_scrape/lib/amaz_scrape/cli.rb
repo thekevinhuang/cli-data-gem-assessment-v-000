@@ -75,9 +75,16 @@ class AmazScrape::CLI
   end
 
   def print_item(amaz_item, index)
-    #puts "Example Pot - by Lodge - $49.99 - 4.6 Stars - Prime Available"
-
     puts "#{index+1}. | #{amaz_item.name} -- by #{amaz_item.maker} -- $#{amaz_item.price} -- #{amaz_item.rating} -- #{amaz_item.prime_token}"
+  end
+
+  def print_description(amaz_item)
+
+    puts "#{amaz_item.name}"
+    puts "Item is #{amaz_item.in_stock}"
+    puts "#{amaz_item.seller}"
+    puts "#{amaz_item.features}"
+    puts "The following colors are available: #{amaz_item.colors}"
   end
 
   def explore_list
@@ -93,15 +100,30 @@ class AmazScrape::CLI
       elsif input.strip.downcase == "exit"
         print_separator
         puts "exit time!!"
+        input = "exit"
       else
         if valid_input?(input)
-          self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
+          storage_hash = self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
+          self.amz_item_list[input.to_i-1].add_attributes(storage_hash)
+          self.print_description(self.amz_item_list[input.to_i-1])
+          if wait_for_input.strip.downcase == "exit"
+            input = "exit"
+          else
+            self.print_items
+          end
         end
         #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
       end
 
     end
     input
+  end
+
+  def wait_for_input
+    
+    puts "Enter exit to exit the program or enter anything to go back to the list again."
+    input = gets
+
   end
 
   def valid_input?(input)
