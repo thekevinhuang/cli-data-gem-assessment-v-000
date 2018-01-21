@@ -7,8 +7,8 @@ class AmazScrape::CLI
   #ask user if they would like additional detail on any in the list
   #allow them to quit/reprint list/re-enter a new item to search
   #
-  attr_reader :amz_item_list
-  
+  attr_reader :amz_item_list, :scraper
+
   @amz_item_list = []
 
   def initialize
@@ -52,19 +52,19 @@ class AmazScrape::CLI
 
   def scrape_items(input)
 
-    scraper = AmazScrape::Scraper.new(input)
+    @scraper = AmazScrape::Scraper.new(input)
 
     #create scraper class, and scrape method
     #have that scrape item return an array of items
 
-    scraper.scrape
-    scraper.scraped_items
+    @scraper.scrape
+    @scraper.scraped_items
   end
 
   def print_items #just physically lists items and accesses the items from an array
     if !self.amz_item_list.empty?
-      self.amz_item_list.each do |item| #change to real amazon item later/for loop
-        print_item(item)
+      self.amz_item_list.each_with_index do |item,i| #change to real amazon item later/for loop
+        print_item(item,i)
       end
       input = explore_list
     else
@@ -74,10 +74,10 @@ class AmazScrape::CLI
     end
   end
 
-  def print_item(amaz_item)
+  def print_item(amaz_item, index)
     #puts "Example Pot - by Lodge - $49.99 - 4.6 Stars - Prime Available"
 
-    puts "#{amaz_item.name} - by #{amaz_item.maker} - $#{amaz_item.price} - #{amaz_item.rating} Stars - #{amaz_item.prime_token}"
+    puts "#{index+1}. | #{amaz_item.name} -- by #{amaz_item.maker} -- $#{amaz_item.price} -- #{amaz_item.rating} -- #{amaz_item.prime_token}"
   end
 
   def explore_list
@@ -95,7 +95,7 @@ class AmazScrape::CLI
         puts "exit time!!"
       else
         if valid_input?(input)
-          puts "This is a valid selection"
+          self.scraper.detail_scrape(self.amaz_item_list[input.to_i-1].link)
         end
         #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
       end

@@ -18,7 +18,6 @@ class AmazScrape::Scraper
 
     @item.strip!
     @item.gsub!(/ /, "%20")
-    puts AMZ_Websearch+@item
     begin
 
       io_item = open(AMZ_Websearch+@item)
@@ -41,6 +40,23 @@ class AmazScrape::Scraper
     end
 
     validation
+  end
+
+  def detail_scrape(url)
+    #scrapes details on page including:
+
+    #features
+    #div#feature-bullets
+
+    #in stock
+    #div#availibility
+
+    #seller
+    #div#merchant-info
+
+    #colors
+    #check if exists
+    #div#variation_color_name
   end
 
   def read_item(amazon_noto_item)
