@@ -46,8 +46,8 @@ class AmazScrape::CLI
   end
 
 
-  def amaz_item_list
-    @amaz_item_list
+  def amz_item_list
+    @amz_item_list
   end
 
   def scrape_items(input)
@@ -95,7 +95,7 @@ class AmazScrape::CLI
         puts "exit time!!"
       else
         if valid_input?(input)
-          self.scraper.detail_scrape(self.amaz_item_list[input.to_i-1].link)
+          self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
         end
         #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
       end
@@ -107,7 +107,7 @@ class AmazScrape::CLI
   def valid_input?(input)
     int_input = input.to_i
     value = true
-    if int_input > 0 and int_input <= self.item_list.length
+    if int_input > 0 and int_input <= self.amz_item_list.length
       value = true
     else
       puts "This input is not valid. Please enter a new response"

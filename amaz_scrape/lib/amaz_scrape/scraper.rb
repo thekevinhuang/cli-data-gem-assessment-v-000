@@ -31,6 +31,8 @@ class AmazScrape::Scraper
     rescue OpenURI::HTTPError => connection_error
       connection_status = connection_error.io.status[0]
       puts "Scraping instance failed with code #{connection_status}"
+      sleep 5
+      item_valid?
     end
 
     if !@amazon_noto_item_list.empty?
@@ -43,20 +45,62 @@ class AmazScrape::Scraper
   end
 
   def detail_scrape(url)
-    #scrapes details on page including:
 
+    begin
+      io_item = open(url)
+      connection_status = io_item.status[0]
+      
+      @detail_page = Nokogiri::HTML(io_item)
+      
+      @amz_detail_scrape = @detail_page.css("div#centerCol")
+
+    rescue OpenURI::HTTPError => connection_error
+      connection_status = connection_error.io.status[0]
+      puts "Scraping instance failed with code #{connection_status}"
+      sleep 5
+      detail_scrape(url)
+    end
+    
+    page_detail_hash = {}
+
+
+    #scrapes details on page including:
+    
     #features
     #div#feature-bullets
+    feature_list = []
+    feature_list = @detail_page.css("div#feature-bullets li span.a-list-item")
+    scraped_features = feature_list.collect {|feat| feat.text.strip}
+    page_detail_hash[:features] = scraped_features.shift
+    puts page_detail_hash[:features]
 
     #in stock
     #div#availibility
+    page_detail_hash[:in_stock] = @detail_page.css("div#availibility span").text.strip
+    puts page_detail_hash[:in_stock]
+    binding.pry
 
     #seller
     #div#merchant-info
+    page_detail_hash[:seller] = @detail_page.css("div#merchant-info").text.split.join(" ").strip
+    puts page_detail_hash[:seller]
 
     #colors
+    if if_not_nil(@detail_page.css("div#variation_color_name ul li"))
+      colors = @detail_page.css("div#variation_color_name ul li").collect do |item_color|
+        item_color.attr("title").split.last
+      end
+
+      page_detail_hash[:colors] = colors
+
+      puts page_detail_hash[:colors]
+      
+    end
     #check if exists
     #div#variation_color_name
+  end
+
+  def list_item_scrape()
   end
 
   def read_item(amazon_noto_item)
