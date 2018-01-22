@@ -34,7 +34,8 @@ class AmazScrape::CLI
         puts "You've selected #{input}!"
         print_separator
         self.amz_item_list = scrape_items(input)#should just be the array
-        print_items
+        input = print_items
+        print_separator
         #secondary loop with the following choices:
         #1. select one of the items
         #2. go back to item select
@@ -66,16 +67,20 @@ class AmazScrape::CLI
       self.amz_item_list.each_with_index do |item,i| #change to real amazon item later/for loop
         print_item(item,i)
       end
+
       input = explore_list
     else
       print_separator
       puts "Nothing to show!"
       print_separator
+      input = "exit"
     end
+    input
   end
 
   def print_item(amaz_item, index)
-    puts "#{index+1}. | #{amaz_item.name} -- by #{amaz_item.maker} -- $#{amaz_item.price} -- #{amaz_item.rating} -- #{amaz_item.prime_token}"
+    puts "#{index+1}. | #{amaz_item.name} -- by #{amaz_item.maker} -- #{amaz_item.price} -- #{amaz_item.rating} -- #{amaz_item.prime_token}"
+    print_separator
   end
 
   def print_description(amaz_item)
@@ -85,6 +90,7 @@ class AmazScrape::CLI
     puts "#{amaz_item.seller}"
     puts "#{amaz_item.features}"
     puts "The following colors are available: #{amaz_item.colors}"
+    print_separator
   end
 
   def explore_list
@@ -96,11 +102,10 @@ class AmazScrape::CLI
 
       if input.strip.downcase == "back"
         print_separator
-        puts "time to go back!"
+        #puts "time to go back!"
       elsif input.strip.downcase == "exit"
         print_separator
-        puts "exit time!!"
-        input = "exit"
+        #puts "exit time!!"
       else
         if valid_input?(input)
           storage_hash = self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
@@ -120,7 +125,7 @@ class AmazScrape::CLI
   end
 
   def wait_for_input
-    
+    print_separator
     puts "Enter exit to exit the program or enter anything to go back to the list again."
     input = gets
 

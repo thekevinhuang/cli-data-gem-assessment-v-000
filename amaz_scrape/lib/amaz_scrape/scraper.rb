@@ -26,7 +26,7 @@ class AmazScrape::Scraper
       @page = Nokogiri::HTML(io_item)
       
       @amazon_noto_item_list = @page.css("body li.s-result-item")[0..9]
-      puts @amazon_noto_item_list.length
+      #puts @amazon_noto_item_list.length
 
     rescue OpenURI::HTTPError => connection_error
       connection_status = connection_error.io.status[0]
@@ -75,11 +75,19 @@ class AmazScrape::Scraper
 
     #in stock
     #div#availibility
-    page_detail_hash[:in_stock] = @detail_page.css("div#availability span").text.strip
+    if @detail_page.css("div#availability span").text.strip.downcase != "in stock."
+      page_detail_hash[:in_stock] = @detail_page.css("div#availability span").text.strip
+    else
+      page_detail_hash[:in_stock] = "This item is only offered by other sellers."
+    end
 
     #seller
     #div#merchant-info
-    page_detail_hash[:seller] = @detail_page.css("div#merchant-info").text.split.join(" ").strip
+    if @detail_page.css("div#merchant-info").text.split.join(" ").strip.downcase != "this item is available from these sellers."
+      page_detail_hash[:seller] = @detail_page.css("div#merchant-info").text.split.join(" ").strip
+    else
+      page_detail_hash[:seller] = "This item is not available on Amazon directly but may be purchased from other merchants."
+    end
 
     #colors
     if if_not_nil(@detail_page.css("div#variation_color_name ul li"))
@@ -87,7 +95,11 @@ class AmazScrape::Scraper
         item_color.attr("title").split.last
       end
 
-      page_detail_hash[:colors] = colors
+      if !colors.empty?
+        page_detail_hash[:colors] = colors
+      else
+        page_detail_hash[:colors] = ["No Options"]
+      end
       page_detail_hash
     end
     #check if exists
@@ -106,13 +118,13 @@ class AmazScrape::Scraper
     #scrape name and store
     if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal"))
       page_item_hash[:name] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").text.strip
-      puts page_item_hash[:name]
+      #puts page_item_hash[:name]
       
       if page_item_hash[:name].length > 1
         #scrape price and store
         if if_not_nil(amazon_noto_item.css("span.a-offscreen"))
           page_item_hash[:price] = amazon_noto_item.css("span.a-offscreen").text
-          puts page_item_hash[:price]
+          #puts page_item_hash[:price]
         end
 
         #scrape maker and store WIP 
@@ -121,7 +133,7 @@ class AmazScrape::Scraper
         elsif if_not_nil(amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)"))
           page_item_hash[:maker] = amazon_noto_item.css("div.a-row.a-spacing-none:nth-child(2) div.a-size-small.a-color-secondary:nth-child(2)").text
         end
-        puts page_item_hash[:maker]
+        #puts page_item_hash[:maker]
 
         #scrape prime and store
         if if_not_nil(amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt"))
@@ -132,19 +144,19 @@ class AmazScrape::Scraper
           end
         end
 
-        puts page_item_hash[:prime]
+        #puts page_item_hash[:prime]
 
         #scrape rating and store
         if if_not_nil(amazon_noto_item.css("i.a-icon-star span.a-icon-alt"))
           page_item_hash[:rating] = amazon_noto_item.css("i.a-icon-star span.a-icon-alt").text
-          puts page_item_hash[:rating]
+          #puts page_item_hash[:rating]
         end
 
         #scrape link for clickthrough
         if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal")) && amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").class.method_defined?(:attr)
           if if_not_nil(amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attr("href"))
             page_item_hash[:link] = amazon_noto_item.css("a.a-link-normal.s-access-detail-page.s-color-twister-title-link.a-text-normal").attr('href').value
-            puts page_item_hash[:link]
+            #puts page_item_hash[:link]
           end
         end
       end
