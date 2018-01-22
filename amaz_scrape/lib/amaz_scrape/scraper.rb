@@ -75,8 +75,9 @@ class AmazScrape::Scraper
 
     #in stock
     #div#availibility
-    if @detail_page.css("div#availability span").text.strip.downcase != "in stock."
+    if @detail_page.css("div#availability span").text.strip.downcase == "in stock."
       page_detail_hash[:in_stock] = @detail_page.css("div#availability span").text.strip
+
     else
       page_detail_hash[:in_stock] = "This item is only offered by other sellers."
     end
@@ -136,12 +137,10 @@ class AmazScrape::Scraper
         #puts page_item_hash[:maker]
 
         #scrape prime and store
-        if if_not_nil(amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt"))
-          if amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom span.a-icon-alt").text == "Prime"
-            page_item_hash[:prime] = true
-          else
-            page_item_hash[:prime] = false
-          end
+        if if_not_nil(amazon_noto_item.css("i.a-icon.a-icon-prime.a-icon-small.s-align-text-bottom"))
+          page_item_hash[:prime] = "Prime Eligible"
+        else
+          page_item_hash[:prime] = "Not Prime Eligible"
         end
 
         #puts page_item_hash[:prime]

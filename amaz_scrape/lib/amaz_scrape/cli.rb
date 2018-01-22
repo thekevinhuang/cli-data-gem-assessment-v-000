@@ -22,26 +22,19 @@ class AmazScrape::CLI
   end
 
   def call
-    input = "start"
+    
+    puts "Please type an item that you would like to search on Amazon!"
+    puts "Type 'exit' to quit"
+    print_separator
+    input = gets.strip.downcase
 
-    while input.strip.downcase != "exit"
-      puts "Please type an item that you would like to search on Amazon!"
-      puts "Type 'exit' to quit"
+    if input != "exit"
+      puts "You've selected #{input}!"
       print_separator
-
-      input = gets.strip
-      if input != "exit"
-        puts "You've selected #{input}!"
-        print_separator
-        self.amz_item_list = scrape_items(input)#should just be the array
-        input = print_items
-        print_separator
-        #secondary loop with the following choices:
-        #1. select one of the items
-        #2. go back to item select
-        #3. exit the program completely
-      end
-
+      self.amz_item_list = scrape_items(input)#should just be the array
+      
+      print_items
+      
     end
     puts "Thanks for using!"
   end
@@ -62,73 +55,64 @@ class AmazScrape::CLI
     @scraper.scraped_items
   end
 
+  def print_item(amaz_item, index)
+    puts "#{index+1}. | #{amaz_item.name} -- by #{amaz_item.maker} -- #{amaz_item.price} -- #{amaz_item.rating} -- #{amaz_item.prime}"
+    print_separator
+  end
+
+  def check_list_item
+    puts "Please enter the number of the item you would like to explore or enter \"back\" to retype a new product or enter \"exit\" to quit"
+    print_separator
+    input = gets.strip.downcase
+    if input != "back" and input != "exit"
+      explore_list(input)
+    elsif input == "back"
+      call
+    else
+
+    end
+  end
+
+  def return_to_list
+    puts "Enter \"exit\" to exit the program or enter anything to go back to the list again."
+    input = gets.strip.downcase
+    
+    if input != "exit"
+      print_items
+    end
+  end
+
   def print_items #just physically lists items and accesses the items from an array
     if !self.amz_item_list.empty?
       self.amz_item_list.each_with_index do |item,i| #change to real amazon item later/for loop
         print_item(item,i)
       end
-
-      input = explore_list
+      check_list_item    
     else
       print_separator
       puts "Nothing to show!"
       print_separator
-      input = "exit"
     end
-    input
-  end
-
-  def print_item(amaz_item, index)
-    puts "#{index+1}. | #{amaz_item.name} -- by #{amaz_item.maker} -- #{amaz_item.price} -- #{amaz_item.rating} -- #{amaz_item.prime_token}"
-    print_separator
   end
 
   def print_description(amaz_item)
 
     puts "#{amaz_item.name}"
-    puts "Item is #{amaz_item.in_stock}"
+    puts "#{amaz_item.in_stock}"
     puts "#{amaz_item.seller}"
     puts "#{amaz_item.features}"
     puts "The following colors are available: #{amaz_item.colors}"
     print_separator
   end
 
-  def explore_list
-    input = "explore"
-    while input.strip.downcase != "exit" and input.strip.downcase != "back"
-      puts "Please enter the number of the item you would like to explore or enter \"back\" to retype a new product or enter \"exit\" to quit"
-      print_separator
-      input = gets
-
-      if input.strip.downcase == "back"
-        print_separator
-        #puts "time to go back!"
-      elsif input.strip.downcase == "exit"
-        print_separator
-        #puts "exit time!!"
-      else
-        if valid_input?(input)
-          storage_hash = self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
-          self.amz_item_list[input.to_i-1].add_attributes(storage_hash)
-          self.print_description(self.amz_item_list[input.to_i-1])
-          if wait_for_input.strip.downcase == "exit"
-            input = "exit"
-          else
-            self.print_items
-          end
-        end
-        #tests the validity of the entry (count of things in the array storing list items/ is a number etc)
-      end
-
+  def explore_list(input)
+    #tests the validity of the entry (count of things in the array storing list items/ is a number etc
+    if valid_input?(input)
+      storage_hash = self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
+      self.amz_item_list[input.to_i-1].add_attributes(storage_hash)
+      self.print_description(self.amz_item_list[input.to_i-1])
+      return_to_list      
     end
-    input
-  end
-
-  def wait_for_input
-    print_separator
-    puts "Enter exit to exit the program or enter anything to go back to the list again."
-    input = gets
-
   end
 
   def valid_input?(input)

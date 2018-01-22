@@ -18,7 +18,7 @@ class AmazScrape::Amazon_Item
   end
   
   def prime_token
-    if self.prime == true
+    if self.prime
       @prime_token = "Prime Eligible"
     else
       @prime_token = "Not Prime Eligible"
