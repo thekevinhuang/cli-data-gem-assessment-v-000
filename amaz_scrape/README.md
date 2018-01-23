@@ -1,8 +1,6 @@
 # AmazScrape
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/amaz_scrape`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+The purpose of this gem is to allow you to search for items on amazon, explore the first 10 items, allowing users to drill down and explore additional details.
 
 ## Installation
 
@@ -22,7 +20,12 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Enter amaz_scrape in the terminal. You will be prompted to enter an item to search on amazon.
+The scrape will initiate. Scraping connections may fail but will automatically reattempt after 5 seconds
+If the scrape was successful, the app will print a list of up to 10 items from the search results.
+The results will contain details such as: name, price, manufacturer, rating and whether it is prime able
+The user will then be able to pick an item to find additional details such as: features, colors, and whether it is in stock on amazon
+The user then can go back to the list to explore additional items or search a new item.
 
 ## Development
 

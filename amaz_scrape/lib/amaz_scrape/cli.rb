@@ -12,7 +12,7 @@ class AmazScrape::CLI
   @amz_item_list = []
 
   def initialize
-    
+    self.call
   end
 
   def amz_item_list=(scraped_items)
@@ -21,7 +21,7 @@ class AmazScrape::CLI
     end
   end
 
-  def call
+  def call #start of program that asks for an item to scrape and then calls print_items
     
     puts "Please type an item that you would like to search on Amazon!"
     puts "Type 'exit' to quit"
@@ -61,6 +61,7 @@ class AmazScrape::CLI
   end
 
   def check_list_item
+    #manages the interaction following the printing of items
     puts "Please enter the number of the item you would like to explore or enter \"back\" to retype a new product or enter \"exit\" to quit"
     print_separator
     input = gets.strip.downcase
@@ -74,6 +75,7 @@ class AmazScrape::CLI
   end
 
   def return_to_list
+    # handles interaction after looking at item detail
     puts "Enter \"exit\" to exit the program or enter anything to go back to the list again."
     input = gets.strip.downcase
     
