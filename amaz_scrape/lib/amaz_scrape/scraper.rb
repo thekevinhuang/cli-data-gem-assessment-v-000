@@ -69,9 +69,9 @@ class AmazScrape::Scraper
     #features
     #div#feature-bullets
     feature_list = []
-    feature_list = @detail_page.css("div#feature-bullets li span.a-list-item")
+    feature_list = @detail_page.css("div#feature-bullets ul.a-unordered-list li:nth-child(n+3)")
     scraped_features = feature_list.collect {|feat| feat.text.strip}
-    page_detail_hash[:features] = scraped_features.shift
+    page_detail_hash[:features] = scraped_features
 
     #in stock
     #div#availibility

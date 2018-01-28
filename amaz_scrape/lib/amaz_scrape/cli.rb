@@ -99,12 +99,30 @@ class AmazScrape::CLI
 
   def print_description(amaz_item)
 
-    puts "#{amaz_item.name}"
+    puts "Name: #{amaz_item.name}"
+    print_separator
+    puts "In Stock:"
     puts "#{amaz_item.in_stock}"
+    print_separator
+    puts "Seller:"
     puts "#{amaz_item.seller}"
-    puts "#{amaz_item.features}"
+    print_separator
+    puts "Features:"
+    print_features(amaz_item)
+    print_separator
+    puts "Color Options:"
     puts "The following colors are available: #{amaz_item.colors}"
     print_separator
+  end
+
+  def print_features(amaz_item)
+    array_features = []
+    if amaz_item.features.is_a? String
+      array_features = amaz_item.features.tr('[]','').gsub!(/\A"|"\Z/, '').split('", "')
+    elsif amaz_item.features.kind_of?(Array)
+      array_features = amaz_item.features
+    end
+    array_features.each {|feature| puts "- #{feature.strip}"}
   end
 
   def explore_list(input)
@@ -113,7 +131,9 @@ class AmazScrape::CLI
       storage_hash = self.scraper.detail_scrape(self.amz_item_list[input.to_i-1].link)
       self.amz_item_list[input.to_i-1].add_attributes(storage_hash)
       self.print_description(self.amz_item_list[input.to_i-1])
-      return_to_list      
+      return_to_list
+    else
+      check_list_item      
     end
   end
 
