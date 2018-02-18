@@ -9,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ["'Kevin Huang'"]
   spec.email         = ["'yellow.khaos@gmail.com'"]
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = "Scrapes Amazon for up to 10 items allowing users to drill down and explore details"
+  spec.description   = "Running amaz_scrape will prompt the user to follow CLI instructions to type a product to scrape, and explore a menu of items"
+  spec.homepage      = "https://github.com/thekevinhuang/cli-data-gem-assessment-v-000"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
