@@ -14,7 +14,6 @@ class AmazScrape::Amazon_Item
     new_hash.each do |key, value|
       self.send "#{key}=" , "#{value}"
     end
-    self
   end
 
   def self.list_all

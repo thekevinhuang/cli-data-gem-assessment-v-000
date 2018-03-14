@@ -61,51 +61,64 @@ class AmazScrape::Scraper
       detail_scrape(url)
     end
     
-    page_detail_hash = {}
+    @page_detail_hash = {}
 
+    feature_scrape
+    in_stock_scrape
+    seller_scrape
+    color_scrape
+    @page_detail_hash
+  end
 
-    #scrapes details on page including:
-    
+  #scrapes details on page including:
+  def feature_scrape  
     #features
     #div#feature-bullets
     feature_list = []
     feature_list = @detail_page.css("div#feature-bullets ul.a-unordered-list li:nth-child(n+3)")
     scraped_features = feature_list.collect {|feat| feat.text.strip}
-    page_detail_hash[:features] = scraped_features
+    @page_detail_hash[:features] = scraped_features
+  end
 
+  def in_stock_scrape
     #in stock
     #div#availibility
     if @detail_page.css("div#availability span").text.strip.downcase == "in stock."
-      page_detail_hash[:in_stock] = @detail_page.css("div#availability span").text.strip
-
+      @page_detail_hash[:in_stock] = @detail_page.css("div#availability span").text.strip
     else
-      page_detail_hash[:in_stock] = "This item is only offered by other sellers."
+      @page_detail_hash[:in_stock] = "This item is only offered by other sellers."
     end
+  end
 
+  def seller_scrape
     #seller
     #div#merchant-info
     if @detail_page.css("div#merchant-info").text.split.join(" ").strip.downcase != "this item is available from these sellers."
-      page_detail_hash[:seller] = @detail_page.css("div#merchant-info").text.split.join(" ").strip
+      @page_detail_hash[:seller] = @detail_page.css("div#merchant-info").text.split.join(" ").strip
     else
-      page_detail_hash[:seller] = "This item is not available on Amazon directly but may be purchased from other merchants."
+      @page_detail_hash[:seller] = "This item is not available on Amazon directly but may be purchased from other merchants."
     end
+  end
 
+      #colors
+  def color_scrape
     #colors
+    #page_detail_hash
+    #check if exists
+    #div#variation_color_name
     if if_not_nil(@detail_page.css("div#variation_color_name ul li"))
       colors = @detail_page.css("div#variation_color_name ul li").collect do |item_color|
         item_color.attr("title").split.last
       end
-
       if !colors.empty?
-        page_detail_hash[:colors] = colors
+        @page_detail_hash[:colors] = colors
       else
-        page_detail_hash[:colors] = ["No Options"]
+        @page_detail_hash[:colors] = ["No Options"]
       end
-      page_detail_hash
     end
+  end
     #check if exists
     #div#variation_color_name
-  end
 
   def read_item(amazon_noto_item)
     #page_item_hash = {}
